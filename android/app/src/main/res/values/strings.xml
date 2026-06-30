@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">EV-Bot Companion</string>
+    <string name="title_activity_main">EV-Bot Companion</string>
+    <string name="package_name">uk.evbot.mobile</string>
+    <string name="custom_url_scheme">uk.evbot.mobile</string>
+</resources>

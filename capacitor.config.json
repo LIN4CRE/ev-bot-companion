@@ -1,0 +1,30 @@
+{
+  "appId": "uk.evbot.mobile",
+  "appName": "EV-Bot Companion",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https",
+    "url": "http://localhost:3000"
+  },
+  "android": {
+    "allowMixedContent": true,
+    "webContentsDebuggingEnabled": true
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_icon_config_sample",
+      "iconColor": "#488AFF",
+      "sound": "beep.wav"
+    },
+    "SplashScreen": {
+      "launchAutoHide": true,
+      "launchShowDuration": 3000,
+      "androidScaleType": "CENTER_CROP",
+      "androidSpin": false,
+      "iosSpinColor": "#999999",
+      "splashImmersive": true,
+      "backgroundColor": "#0f1117"
+    }
+  }
+}

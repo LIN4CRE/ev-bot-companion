@@ -1,0 +1,6 @@
+{
+  "name": "EV-Bot Companion",
+  "description": "The official Android Companion app for EV-Bot. Connects your Windows/macOS companion desktop client, integrates with the 'EV' Alexa Skill (ev-bot.uk), and offers animated EV-Companion smart vector avatars with real-time PC macro triggers.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
