@@ -39,13 +39,14 @@ export const db = new EvBotDB();
  * Sync manager for keeping local DB in sync with server
  */
 export class SyncManager {
-  private static syncInProgress = false;
+  private static syncInProgressEvents = false;
+  private static syncInProgressMacros = false;
   private static lastSyncTime = 0;
   private static syncInterval = 30000; // 30 seconds
 
   static async syncAlexaEvents(serverEvents: AlexaEvent[]): Promise<void> {
-    if (this.syncInProgress) return;
-    this.syncInProgress = true;
+    if (this.syncInProgressEvents) return;
+    this.syncInProgressEvents = true;
 
     try {
       const localEvents = await db.alexaEvents.toArray();
@@ -62,14 +63,14 @@ export class SyncManager {
         }
       }
     } finally {
-      this.syncInProgress = false;
+      this.syncInProgressEvents = false;
       this.lastSyncTime = Date.now();
     }
   }
 
   static async syncMacros(serverMacros: DesktopMacro[]): Promise<void> {
-    if (this.syncInProgress) return;
-    this.syncInProgress = true;
+    if (this.syncInProgressMacros) return;
+    this.syncInProgressMacros = true;
 
     try {
       const localMacros = await db.macros.toArray();
@@ -86,7 +87,7 @@ export class SyncManager {
         }
       }
     } finally {
-      this.syncInProgress = false;
+      this.syncInProgressMacros = false;
       this.lastSyncTime = Date.now();
     }
   }

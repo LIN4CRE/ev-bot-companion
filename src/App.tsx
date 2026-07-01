@@ -213,6 +213,7 @@ export default function App() {
   // Sync state & automatic offline fallback
   const [isOffline, setIsOffline] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+  const retryCountRef = useRef(0);
   
   // Echo Show Smart Display Simulation States
   const [echoSubtitles, setEchoSubtitles] = useState("EV-Bot connected and ready for hands-free voice commands.");
@@ -497,6 +498,7 @@ export default function App() {
         setPcConnection(data.pcConnection);
         setIsOffline(false);
         setRetryCount(0);
+        retryCountRef.current = 0;
         // Persist fresh server state to local cache
         localStorage.setItem("evbot_cached_state", JSON.stringify(data));
       } else {
@@ -507,8 +509,9 @@ export default function App() {
       setIsOffline(true);
       
       // Auto-retry with exponential backoff back to online state
-      const nextDelay = Math.min(2000 * Math.pow(2, retryCount), 20000);
-      setRetryCount(prev => prev + 1);
+      retryCountRef.current += 1;
+      const nextDelay = Math.min(2000 * Math.pow(2, retryCountRef.current), 20000);
+      setRetryCount(retryCountRef.current);
       setTimeout(fetchState, nextDelay);
     }
   };

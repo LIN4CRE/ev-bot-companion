@@ -9,11 +9,23 @@ dotenv.config();
 const app = express();
 const PORT = 3000;
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8000";
+// Default to localhost only; override with CORS_ORIGIN env var in production.
+const CORS_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:3000";
+
+// Maximum characters accepted in a single /api/gemini/chat prompt.
+const MAX_PROMPT_LENGTH = 8000;
 
 app.use(express.json());
 
+const ALLOWED_ORIGINS = CORS_ORIGIN.split(",").map(s => s.trim());
+
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", process.env.CORS_ORIGIN || "*");
+  const origin = req.headers.origin;
+  if (origin && !ALLOWED_ORIGINS.includes(origin) && !ALLOWED_ORIGINS.includes("*")) {
+    return res.status(403).json({ error: "Origin not allowed" });
+  }
+  const allowedOrigin = origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  res.header("Access-Control-Allow-Origin", allowedOrigin || CORS_ORIGIN);
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
   if (req.method === "OPTIONS") return res.sendStatus(200);
@@ -63,6 +75,15 @@ app.use("/api", async (req, res, next) => {
 app.post("/api/gemini/chat", async (req, res) => {
   const { prompt, history, customGeminiKey } = req.body;
   if (!prompt) return res.status(400).json({ error: "Prompt is required" });
+  if (typeof prompt !== "string" || prompt.length > MAX_PROMPT_LENGTH) {
+    return res.status(400).json({ error: `Prompt must be a string of at most ${MAX_PROMPT_LENGTH} characters` });
+  }
+  if (customGeminiKey !== undefined && (typeof customGeminiKey !== "string" || customGeminiKey.length > 512)) {
+    return res.status(400).json({ error: "customGeminiKey must be a string of at most 512 characters" });
+  }
+  if (history !== undefined && !Array.isArray(history)) {
+    return res.status(400).json({ error: "history must be an array" });
+  }
 
   const apiKey = (customGeminiKey && customGeminiKey.trim() !== "") ? customGeminiKey : process.env.GEMINI_API_KEY;
   const useVertex = process.env.USE_VERTEX_AI === "true";
