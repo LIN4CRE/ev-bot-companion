@@ -4,4 +4,8 @@
     <string name="title_activity_main">EV-Bot Companion</string>
     <string name="package_name">uk.evbot.mobile</string>
     <string name="custom_url_scheme">uk.evbot.mobile</string>
+    <string name="shortcut_title">Open EV Bot</string>
+    <string name="shortcut_long_title">Open EV-Bot Companion Dashboard</string>
+    <string name="ev_widget_title">EV-BOT</string>
+    <string name="ev_widget_subtitle">Tap to open companion</string>
 </resources>

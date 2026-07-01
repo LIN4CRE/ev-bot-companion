@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="open_ev_bot"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/shortcut_title"
+        android:shortcutLongLabel="@string/shortcut_long_title">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="uk.evbot.mobile"
+            android:targetClass="uk.evbot.mobile.MainActivity" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+</shortcuts>

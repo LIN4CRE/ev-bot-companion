@@ -115,6 +115,16 @@ export default function App() {
       localStorage.setItem("evbot_api_keys", JSON.stringify(apiKeys));
     } catch (e) {}
   }, [apiKeys]);
+
+  // Set initial viewMode based on URL query parameter
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("view") === "echoshow") {
+        setViewMode("echoshow");
+      }
+    }
+  }, []);
   
   // States fetched from backend or local cache fallback
   const [alexaEvents, setAlexaEvents] = useState<AlexaEvent[]>([]);
@@ -364,7 +374,7 @@ export default function App() {
   }, [viewMode, expression, skin]);
 
   const [pcConnection, setPcConnection] = useState<PCConnection>({
-    ipAddress: "192.168.1.142",
+    ipAddress: "",
     status: "connected",
     latency: "12ms",
     lastSeen: new Date().toISOString(),
@@ -382,7 +392,7 @@ export default function App() {
     {
       id: "welcome",
       sender: "clippy",
-      text: "System Online! 🛰️⚡ I'm EV-Bot (aka EV), your holographic Android companion. My domain is ev-bot.uk, and your Alexa Skill is called 'EV'. Say 'Alexa, open ev-bot' to command your computer!",
+      text: "System Online! 🛰️⚡ I'm EV-Bot, your holographic Android companion. My official domain is ev-bot.uk, and your Alexa Skill is called 'helper eve'. Say 'Alexa, open helper eve' to command your computer!",
       timestamp: new Date()
     }
   ]);
@@ -428,7 +438,7 @@ export default function App() {
   // Alexa command simulator input
   const [alexaSimInput, setAlexaSimInput] = useState("");
   const [customDomain, setCustomDomain] = useState("ev-bot.uk");
-  const [skillId, setSkillId] = useState("amzn1.echo-sdk-skill.ef9021-ev-bot-skill");
+  const [skillId, setSkillId] = useState("amzn1.ask.skill.958ed01d-6259-45fc-820c-265de0fe50f8");
 
   // Macro Form Input state
   const [newMacro, setNewMacro] = useState({
@@ -506,6 +516,42 @@ export default function App() {
   useEffect(() => {
     fetchState();
   }, []);
+
+  // Load Alexa Web API for Games SDK inside Echo Show screen context
+  useEffect(() => {
+    if (typeof window !== "undefined" && viewMode === "echoshow") {
+      const script = document.createElement("script");
+      script.src = "https://alexa-analytics.sdk.amazonalexa.com/v1/alexa-web-api.js";
+      script.onload = () => {
+        const alexa = (window as any).Alexa;
+        if (alexa) {
+          alexa.create({ version: "1.1" })
+            .then((client: any) => {
+              console.log("Alexa Web API client initialized successfully");
+              if (client.message) {
+                client.message.onMessage((message: any) => {
+                  if (message.text) {
+                    setEchoSubtitles(message.text);
+                  }
+                  if (message.expression) {
+                    setExpression(message.expression);
+                  }
+                });
+              }
+            })
+            .catch((err: any) => {
+              console.error("Alexa Web API client creation failed:", err);
+            });
+        }
+      };
+      document.head.appendChild(script);
+      return () => {
+        try {
+          document.head.removeChild(script);
+        } catch (_) {}
+      };
+    }
+  }, [viewMode]);
 
   // Auto-scroll chat
   useEffect(() => {
@@ -587,7 +633,7 @@ export default function App() {
           localResponse = `📁 Uploaded file **"${attachment.name}"** (${attachment.size || "unknown size"}) has been cached successfully. EV-Bot has queued this script in your active macro environment!`;
         }
       } else if (query.includes("alexa") || query.includes("skill") || query.includes("eve") || query.includes("evot")) {
-        localResponse += "Your 'EV' Alexa Skill is integrated at ev-bot.uk. You can say 'Alexa, open EV' or 'Alexa, open Eve' to transmit custom desktop commands! Try setting up macros to link them.";
+        localResponse += "Your 'helper eve' Alexa Skill is integrated at ev-bot.uk. You can say 'Alexa, open helper eve' to transmit custom desktop commands! Try setting up macros to link them.";
       } else if (query.includes("joke") || query.includes("laugh")) {
         localResponse += "Why do robots never get tired? Because they always recharge their batteries! ⚡ Stay fully loaded!";
       } else if (query.includes("macro") || query.includes("shortcut")) {
@@ -631,20 +677,6 @@ export default function App() {
       });
 
       if (response.ok) {
-        // Play success audio feedback (subtle synth beep)
-        const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = "sine";
-        osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
-        osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.1); // A5
-        gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.3);
-
         setExpression("happy");
         // Trigger macro warning feedback if the phrase triggers desktop activities
         let macroNotice = "";
@@ -677,20 +709,6 @@ export default function App() {
     } catch (e) {
       console.warn("Failed to trigger Alexa voice command on server, invoking offline local simulation:", e);
       
-      // Play local synth beep
-      try {
-        const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = "sine";
-        osc.frequency.setValueAtTime(440, audioCtx.currentTime); // A4 fallback
-        gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.2);
-      } catch (err) {}
-
       setExpression("happy");
       let offlineNotice = `Offline Mode: Simulated broadcast of "${phrase}"`;
       const lower = phrase.toLowerCase();

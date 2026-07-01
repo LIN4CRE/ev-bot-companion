@@ -12,9 +12,13 @@ export interface AlexaSkillConfig {
   apiKey?: string;
 }
 
+export type SSECallback = (event: { type: string; [key: string]: any }) => void;
+
 export class AlexaService {
   private static config: AlexaSkillConfig | null = null;
   private static syncInterval: NodeJS.Timeout | null = null;
+  private static eventSource: EventSource | null = null;
+  private static sseCallbacks: SSECallback[] = [];
 
   /**
    * Initialize Alexa service with backend endpoint
@@ -49,7 +53,7 @@ export class AlexaService {
     }
 
     try {
-      const response = await fetch(`${config.endpoint}/api/alexa/trigger`, {
+      const response = await fetch(`${config.endpoint}/api/v1/evbot/alexa/trigger`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -101,7 +105,7 @@ export class AlexaService {
     if (config) {
       try {
         const response = await fetch(
-          `${config.endpoint}/api/evbot/state`,
+          `${config.endpoint}/api/v1/evbot/state`,
           config.apiKey ? { headers: { "Authorization": `Bearer ${config.apiKey}` } } : {}
         );
 
@@ -130,7 +134,7 @@ export class AlexaService {
     const config = await this.getConfig();
 
     try {
-      const response = await fetch(`${config?.endpoint}/api/desktop/macros`, {
+      const response = await fetch(`${config?.endpoint}/api/v1/evbot/macros`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -164,7 +168,7 @@ export class AlexaService {
     const config = await this.getConfig();
 
     try {
-      const response = await fetch(`${config?.endpoint}/api/desktop/macros/${id}`, {
+      const response = await fetch(`${config?.endpoint}/api/v1/evbot/macros/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -198,7 +202,7 @@ export class AlexaService {
     const config = await this.getConfig();
 
     try {
-      const response = await fetch(`${config?.endpoint}/api/desktop/macros/${id}`, {
+      const response = await fetch(`${config?.endpoint}/api/v1/evbot/macros/${id}`, {
         method: "DELETE",
         headers: config?.apiKey ? { "Authorization": `Bearer ${config.apiKey}` } : {}
       });
@@ -222,7 +226,7 @@ export class AlexaService {
     if (config) {
       try {
         const response = await fetch(
-          `${config.endpoint}/api/evbot/state`,
+          `${config.endpoint}/api/v1/evbot/state`,
           config.apiKey ? { headers: { "Authorization": `Bearer ${config.apiKey}` } } : {}
         );
 
@@ -273,16 +277,63 @@ export class AlexaService {
   }
 
   /**
-   * Start automatic sync every 30 seconds
+   * Subscribe to Server-Sent Events (replaces 30s polling).
+   * Calls the callback whenever a state-change event is pushed.
+   */
+  static subscribeToEvents(callback: SSECallback): void {
+    this.sseCallbacks.push(callback);
+    if (!this.eventSource) {
+      this._connectSSE();
+    }
+  }
+
+  /**
+   * Unsubscribe a callback from SSE events.
+   */
+  static unsubscribeFromEvents(callback: SSECallback): void {
+    this.sseCallbacks = this.sseCallbacks.filter(cb => cb !== callback);
+    if (this.sseCallbacks.length === 0) {
+      this._disconnectSSE();
+    }
+  }
+
+  private static _connectSSE(): void {
+    const endpoint = this.config?.endpoint;
+    if (!endpoint) return;
+    this.eventSource = new EventSource(`${endpoint}/api/v1/evbot/events`);
+    this.eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        this.sseCallbacks.forEach(cb => cb(data));
+      } catch {
+        // ignore malformed events
+      }
+    };
+    this.eventSource.onerror = () => {
+      // Reconnect after a brief delay on connection loss
+      this._disconnectSSE();
+      setTimeout(() => this._connectSSE(), 5000);
+    };
+  }
+
+  private static _disconnectSSE(): void {
+    if (this.eventSource) {
+      this.eventSource.close();
+      this.eventSource = null;
+    }
+  }
+
+  /**
+   * Start automatic sync — now SSE-driven instead of 30s polling.
    */
   private static startAutoSync(): void {
     if (this.syncInterval) return;
-
+    // Keep a fallback poll for pending data sync (not for state fetch)
     this.syncInterval = setInterval(() => {
       if (SyncManager.shouldSync()) {
         this.syncPendingData().catch(console.error);
       }
-    }, 30000);
+    }, 60000);
   }
 
   /**
@@ -293,6 +344,7 @@ export class AlexaService {
       clearInterval(this.syncInterval);
       this.syncInterval = null;
     }
+    this._disconnectSSE();
   }
 
   /**
