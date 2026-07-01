@@ -99,8 +99,8 @@ export class SyncManager {
     events: CachedAlexaEvent[];
     macros: CachedMacro[];
   }> {
-    const events = await db.alexaEvents.where("synced").notEqual(true).toArray();
-    const macros = await db.macros.where("synced").notEqual(true).toArray();
+    const events = await db.alexaEvents.filter(e => e.synced !== true).toArray();
+    const macros = await db.macros.filter(m => m.synced !== true).toArray();
     return { events, macros };
   }
 

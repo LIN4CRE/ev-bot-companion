@@ -45,7 +45,7 @@ export class CapacitorBridge {
   static async showToast(message: string, duration: "short" | "long" = "short"): Promise<void> {
     await Toast.show({
       text: message,
-      duration: duration === "short" ? 2000 : 3500,
+      duration,
       position: "bottom"
     });
   }
