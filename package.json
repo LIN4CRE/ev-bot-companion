@@ -1,5 +1,5 @@
 {
-  "name": "react-example",
+  "name": "@evbot/companion",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -32,6 +32,7 @@
     "react-dom": "^19.0.1",
     "vite": "^6.2.3",
     "express": "^4.21.2",
+    "helmet": "^8.0.0",
     "dotenv": "^17.2.3",
     "motion": "^12.23.24",
     "dexie": "^4.0.0"

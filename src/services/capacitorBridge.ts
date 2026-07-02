@@ -106,7 +106,7 @@ export class CapacitorBridge {
         if (action.startsWith("//action/macro/")) {
           const macroId = action.split("/").pop();
           window.dispatchEvent(
-            new CustomEvent("evbot:executeeMacro", { detail: { macroId } })
+            new CustomEvent("evbot:executeMacro", { detail: { macroId } })
           );
         } else if (action.startsWith("//action/trigger")) {
           const phrase = urlObj.searchParams.get("phrase");
