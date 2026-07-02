@@ -442,10 +442,16 @@ export default function App() {
   const [skillId, setSkillId] = useState("amzn1.ask.skill.958ed01d-6259-45fc-820c-265de0fe50f8");
 
   // Macro Form Input state
-  const [newMacro, setNewMacro] = useState({
+  const [newMacro, setNewMacro] = useState<{
+    name: string;
+    hotkey: string;
+    category: "utility" | "app" | "media" | "custom";
+    description: string;
+    actions: string;
+  }>({
     name: "",
     hotkey: "",
-    category: "utility" as const,
+    category: "utility",
     description: "",
     actions: ""
   });
@@ -849,7 +855,7 @@ export default function App() {
         const data = await res.json();
         setPcConnection(data);
         if (nextStatus === "disconnected") {
-          setExpression("alert");
+          setExpression("thinking");
           setTimeout(() => setExpression("idle"), 2500);
         }
       }

@@ -5,7 +5,10 @@ import dotenv from "dotenv";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 
+// Load environment variables: local .env first, then project root .env as fallback.
+// This ensures the centralized root .env is the single source of truth for API keys.
 dotenv.config();
+dotenv.config({ path: path.resolve(process.cwd(), "..", ".env") });
 
 const app = express();
 const PORT = parseInt(process.env.PORT || "3000", 10);
