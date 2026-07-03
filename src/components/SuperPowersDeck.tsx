@@ -12,7 +12,9 @@ import {
   Terminal,
   HelpCircle,
   AlertTriangle,
-  Check
+  Check,
+  Smartphone,
+  Laptop
 } from "lucide-react";
 
 interface SuperPowersDeckProps {
@@ -46,6 +48,15 @@ export default function SuperPowersDeck({
     elevenlabs: false,
     webhookSecret: false
   });
+
+  const [pcIp, setPcIp] = useState(() => {
+    return localStorage.getItem("evbot_pc_ip") || "100.91.217.7";
+  });
+
+  const handlePcIpChange = (val: string) => {
+    setPcIp(val);
+    localStorage.setItem("evbot_pc_ip", val);
+  };
 
   const [diagnosticLog, setDiagnosticLog] = useState<string[]>([
     "System standby. Enter credentials above and click 'Run Handshake' to execute the neural test sequence."
@@ -368,6 +379,68 @@ export default function SuperPowersDeck({
               >
                 {showKeys.webhookSecret ? <Unlock className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
               </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Card 5: Tailscale Device Linking (Full Width) */}
+        <div className="col-span-1 md:col-span-2 bg-slate-900/40 border border-emerald-500/15 rounded-xl p-5 shadow flex flex-col md:flex-row justify-between gap-6 relative hover:border-emerald-500/30 transition duration-300">
+          <div className="flex-1 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <div className="p-1.5 bg-emerald-500/10 rounded-lg text-emerald-400">
+                  <Zap className="w-4 h-4" />
+                </div>
+                <h3 className="text-sm font-semibold text-slate-100 font-display">Tailscale Phone & PC Link</h3>
+              </div>
+              <span className="px-1.5 py-0.5 text-[8px] font-mono rounded font-bold uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                Active Mesh
+              </span>
+            </div>
+
+            <p className="text-[11px] text-slate-400 leading-relaxed">
+              Link your mobile companion app and Docker stacks securely using Tailscale's encrypted private network mesh.
+            </p>
+
+            {/* Device list */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1.5">
+              <div className="bg-slate-950/60 p-2.5 rounded-lg border border-slate-800 flex items-center gap-2">
+                <Smartphone className="w-4 h-4 text-sky-400" />
+                <div className="min-w-0">
+                  <span className="block text-[8px] font-mono text-slate-500">POCO-F7-1 (PHONE)</span>
+                  <span className="block text-[10px] font-mono text-slate-300 truncate">100.102.1.7</span>
+                </div>
+              </div>
+              <div className="bg-slate-950/60 p-2.5 rounded-lg border border-slate-800 flex items-center gap-2">
+                <Laptop className="w-4 h-4 text-emerald-400" />
+                <div className="min-w-0">
+                  <span className="block text-[8px] font-mono text-slate-500">DL (PC HOST)</span>
+                  <span className="block text-[10px] font-mono text-slate-300 truncate">100.91.217.7</span>
+                </div>
+              </div>
+              <div className="bg-slate-950/60 p-2.5 rounded-lg border border-slate-800 flex items-center gap-2">
+                <Terminal className="w-4 h-4 text-purple-400" />
+                <div className="min-w-0">
+                  <span className="block text-[8px] font-mono text-slate-500">DOCKER-DESKTOP</span>
+                  <span className="block text-[10px] font-mono text-slate-300 truncate">100.119.229.89</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="w-full md:w-64 space-y-2.5 pt-4 md:pt-0 md:pl-6 md:border-l border-slate-800/60 flex flex-col justify-between">
+            <div className="space-y-1">
+              <label className="block text-[10px] font-mono text-slate-400">HOST PC TAILSCALE IP</label>
+              <input
+                type="text"
+                value={pcIp}
+                onChange={(e) => handlePcIpChange(e.target.value)}
+                placeholder="100.91.217.7"
+                className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs font-mono text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500 transition-colors"
+              />
+            </div>
+            <div className="text-[9px] font-mono text-slate-500 leading-tight">
+              * The mobile companion app utilizes this IP to connect directly to the Express server running on port 3000.
             </div>
           </div>
         </div>

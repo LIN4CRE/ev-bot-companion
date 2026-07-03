@@ -14,7 +14,7 @@ const app = express();
 const PORT = parseInt(process.env.PORT || "3000", 10);
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8000";
 // Default to localhost only; override with CORS_ORIGIN env var in production.
-const CORS_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:3000";
+const CORS_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:3000,http://100.91.217.7:3000,http://100.102.1.7:3000";
 const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 
 // Maximum characters accepted in a single /api/gemini/chat prompt.

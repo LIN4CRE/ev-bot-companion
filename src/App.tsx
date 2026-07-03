@@ -50,6 +50,16 @@ import { AlexaEvent, DesktopMacro, PCConnection, ChatMessage, ClippySkin, Resili
 import evBotLogo from "./assets/ev_bot_logo.jpg";
 
 export default function App() {
+  // Tailscale Phone Link API base URL helper
+  const getApiUrl = (path: string): string => {
+    const isCapacitor = (window as any).Capacitor !== undefined || window.location.protocol.startsWith("file:") || (window.location.hostname === "localhost" && !window.location.port);
+    if (isCapacitor) {
+      const pcIp = localStorage.getItem("evbot_pc_ip") || "100.91.217.7";
+      return `http://${pcIp}:3000${path}`;
+    }
+    return path;
+  };
+
   // Clippy / EV-Bot Interactive States
   const [skin, setSkin] = useState<ClippySkin>("hologram");
   const [companion, setCompanion] = useState<CompanionId>(() => {
@@ -375,7 +385,7 @@ export default function App() {
   }, [viewMode, expression, skin]);
 
   const [pcConnection, setPcConnection] = useState<PCConnection>({
-    ipAddress: "",
+    ipAddress: "100.91.217.7",
     status: "connected",
     latency: "12ms",
     lastSeen: new Date().toISOString(),
@@ -496,7 +506,7 @@ export default function App() {
   // Fetch state from server with automatic fallback cache and auto-retry sync
   const fetchState = async () => {
     try {
-      const res = await fetch("/api/evbot/state");
+      const res = await fetch(getApiUrl("/api/evbot/state"));
       if (res.ok) {
         const data = await res.json();
         setAlexaEvents(data.alexaEvents);
@@ -598,7 +608,7 @@ export default function App() {
         finalPrompt = `[User attached ${attachment.type} named "${attachment.name}"] ${prompt || "Analyze this upload"}`;
       }
 
-      const response = await fetch("/api/gemini/chat", {
+      const response = await fetch(getApiUrl("/api/gemini/chat"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
@@ -679,7 +689,7 @@ export default function App() {
     setExpression("listening");
 
     try {
-      const response = await fetch("/api/alexa/trigger", {
+      const response = await fetch(getApiUrl("/api/alexa/trigger"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phrase })
@@ -775,7 +785,7 @@ export default function App() {
     });
 
     try {
-      const res = await fetch(`/api/desktop/macros/${id}`, {
+      const res = await fetch(getApiUrl(`/api/desktop/macros/${id}`), {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isActive: !currentActive })
@@ -802,7 +812,7 @@ export default function App() {
     });
 
     try {
-      const res = await fetch(`/api/desktop/macros/${id}`, {
+      const res = await fetch(getApiUrl(`/api/desktop/macros/${id}`), {
         method: "DELETE"
       });
       if (!res.ok) {
@@ -846,7 +856,7 @@ export default function App() {
   const handleTogglePCConnection = async () => {
     const nextStatus = pcConnection.status === "connected" ? "disconnected" : "connected";
     try {
-      const res = await fetch("/api/desktop/connection", {
+      const res = await fetch(getApiUrl("/api/desktop/connection"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: nextStatus })
@@ -902,7 +912,7 @@ export default function App() {
     setTimeout(() => setExpression("idle"), 2000);
 
     try {
-      const res = await fetch("/api/desktop/macros", {
+      const res = await fetch(getApiUrl("/api/desktop/macros"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
