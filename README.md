@@ -1,3 +1,5 @@
+<p align="center"><img src="https://raw.githubusercontent.com/LIN4CRE/ev-bot-companion/main/.github/banner.png" alt="ev-bot-companion banner" width="100%"></p>
+
 # EV-Bot Companion
 
 The Android/web client for **EV-Bot** ("EV") — a holographic AI companion character that bridges a phone, a desktop PC, and an Amazon Alexa custom skill. **"EV" here is the assistant's name, not "electric vehicle."**
