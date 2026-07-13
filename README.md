@@ -1,5 +1,12 @@
 <p align="center"><img src="https://raw.githubusercontent.com/LIN4CRE/ev-bot-companion/main/.github/banner.png" alt="ev-bot-companion banner" width="100%"></p>
 
+
+<p align="center">
+<img src="https://img.shields.io/badge/React-20232A?style=flat-square&logo=react&logoColor=61DAFB">
+<img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white">
+<img src="https://img.shields.io/badge/Gemini-8E75B2?style=flat-square&logo=googlegemini&logoColor=white">
+<img src="https://img.shields.io/badge/Android-3DDC84?style=flat-square&logo=android&logoColor=white">
+</p>
 # EV-Bot Companion
 
 The Android/web client for **EV-Bot** ("EV") — a holographic AI companion character that bridges a phone, a desktop PC, and an Amazon Alexa custom skill. **"EV" here is the assistant's name, not "electric vehicle."**
